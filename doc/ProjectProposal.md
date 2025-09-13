@@ -97,7 +97,7 @@ audience, helping increase individual customer interaction and satisfaction.
 
 ### UI Mockup
 
-**[Insert UI mockup image here]**
+![UI mockup](IMG_3399.jpeg)
 
 The largest square is the home page and the arrows represent what page will load after clicking 
 an element on the home page. The individual pages are also reachable from each other via the 
