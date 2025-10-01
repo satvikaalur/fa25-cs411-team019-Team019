@@ -80,6 +80,11 @@ Purchases that are not returned will have the mentioned customer service attribu
 total, the merged data set has **17 attributes** and **22,801 purchases** from **16,501 unique 
 customers**.  
 
+customer service dataset: https://www.kaggle.com/datasets/ddosad/ecommerce-customer-service-satisfaction 
+purchase history dataset: https://www.kaggle.com/datasets/ankitverma2010/ecommerce-customer-churn-analysis-and-prediction
+
+The merged dataset is added as a csv file in the "doc" folder of our repository.
+
 ---
 
 ### Functionality
@@ -91,7 +96,9 @@ being sent based on certain customer satisfaction as mentioned previously. Updat
 happen as more customer feedback is sent, so email lists are becoming more specific for 
 specific audiences instead of still staying broad. Imagine this as a growing network where the 
 more information the company is being fed, the more specific their emails become for their 
-audience, helping increase individual customer interaction and satisfaction.  
+audience, helping increase individual customer interaction and satisfaction. Once an email list is 
+created, it is automatically saved for reuse, but the user will have an option to delete an email
+if they would not like to keep it.
 
 ---
 
