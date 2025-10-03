@@ -74,3 +74,15 @@ listId → listTitle, createdDate
 This schema is already normalized because we designed the relationships to avoid redundancy from the start. We identified the functional dependecies above and used them as a guide to structure our entities and choose appropriate primary keys. Anything that would create overlap or redunduncies was split out. In particular, we moved dependent details into their own weak entity, like Return lives in a seperate dependent table; so those attributes depend only on the right key. Every non-key attribute depends on the key, satisfying BCNF without further decomposition.
 
 ## Logical Design
+
+Customer(customerId: INT [PK], email: VARCHAR(255), custName: VARCHAR(100), age: INT, gender: VARCHAR(20))
+
+EmailList(listId: INT [PK], listTitle: VARCHAR(120), createdDate: DATE)
+
+CustomerEmailList(customerId: INT [PK, FK to Customer.customerId], listId: INT [PK, FK to EmailList.listId])
+
+Employee(employeeId: INT [PK], empName: VARCHAR(100), empTitle: VARCHAR(100), tenure: INT)
+
+Purchase(purchaseId: INT [PK], customerId: INT [FK to Customer.customerId], purchDate: DATE, quantity: INT, category: VARCHAR(50), amount: DECIMAL(10,2), returned: BOOLEAN)
+
+Return(returnId: INT [PK], purchaseId: INT [FK to Purchase.purchaseId], employeeId: INT [FK to Employee.employeeId], returnDate: DATE, csat_score: DECIMAL(3,2))
