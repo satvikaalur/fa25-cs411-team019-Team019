@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS Returns (
 ## Advanced Queries
 We have decided to focus our advanced queries on our marketing email list creation, which will make lists of customers and 
 their emails based on different criteria. Below are the individual commands and the first 15 outputs.
-#### Query 1
+#### Query 1: Select customers who have returned 2 or more purchases
 ```
 SELECT c.custName, c.customerId, c.email, COUNT(r.returnId) as total_returns
 FROM Customer c JOIN Purchase p ON c.customerId = p.customerId
@@ -101,7 +101,7 @@ ORDER BY total_returns DESC
 LIMIT 15;
 ```
 ![query one](images/query1.png)
-#### Query 2
+#### Query 2: Select top spending customers who have never returned a purchase
 ```
 SELECT c.custName, c.customerId, c.email, SUM(p.amount) as total_spent
 FROM Customer c JOIN Purchase p ON c.customerId = p.customerId
@@ -115,14 +115,48 @@ ORDER BY total_spent DESC
 LIMIT 15;
 ```
 ![query two](images/query2.png)
-#### Query 3
+#### Query 3: Select top spending customers who have not purchased in a certain amount of days
 ```
-code here
+SELECT
+  c.customerId,
+  c.custName AS customer_name,
+  c.email AS customer_email,
+  SUM(p.amount) AS lifetime_spend,
+  MAX(p.purchDate) AS last_purchase_date
+FROM Customer AS c
+JOIN Purchase AS p ON p.customerId = c.customerId
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM Purchase AS p2
+  WHERE p2.customerId = c.customerId
+    AND p2.purchDate >= DATE_SUB(CURDATE(), INTERVAL 180 DAY)
+)
+GROUP BY c.customerId, c.custName, c.email
+HAVING SUM(p.amount) >= 5000
+ORDER BY last_purchase_date ASC
+LIMIT 15;
 ```
 image here  
-#### Query 4
+#### Query 4: Select customers who have purchased products in one category but not another
 ```
-code here
+SELECT
+  c.customerId,
+  c.custName AS customer_name,
+  c.email AS customer_email,
+  COUNT(*) AS primary_orders_without_accessory_30d
+FROM Customer AS c
+JOIN Purchase AS pA ON pA.customerId = c.customerId
+WHERE pA.category = 'electronics'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM Purchase AS pB
+    WHERE pB.customerId = c.customerId
+      AND pB.category = 'books'
+      AND pB.purchDate BETWEEN pA.purchDate AND DATE_ADD(pA.purchDate, INTERVAL 30 DAY)
+  )
+GROUP BY c.customerId, c.custName, c.email
+ORDER BY primary_orders_without_accessory_30d DESC
+LIMIT 15;
 ```
 image here  
 
