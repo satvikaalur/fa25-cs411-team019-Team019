@@ -136,7 +136,7 @@ HAVING SUM(p.amount) >= 5000
 ORDER BY last_purchase_date ASC
 LIMIT 15;
 ```
-image here  
+![query three](images/query3.png)
 #### Query 4: Select customers who have purchased products in one category but not another
 ```
 SELECT
@@ -158,37 +158,87 @@ GROUP BY c.customerId, c.custName, c.email
 ORDER BY primary_orders_without_accessory_30d DESC
 LIMIT 15;
 ```
-image here  
+![query four](images/query4.png) 
 
 ## Indexing
-Firstly, we ran all of our queries with the EXPLAIN ANAYLZE command with no indexing. Below are the costs for each query in that scenario:
-| Query | Cost |
-|----------|:---------:|
-| Query 1 |  |
-| Query 2 |  |
-| Query 3 |  |
-| Query 4 |  |
+### Methodology
+We tested four advanced queries against three different indexing configurations to measure performance improvements. For each configuration, we used the `EXPLAIN ANALYZE` command to measure query execution cost.
 
-First index design:
-| Query | Cost |
-|----------|:---------:|
-| Query 1 |  |
-| Query 2 |  |
-| Query 3 |  |
-| Query 4 |  |
+### Index Configurations Tested
+1. **Baseline**: No additional indexes (only primary keys)
+2. **Config 1**: Index on `Purchase.customerId`
+3. **Config 2**: Index on `Returns.purchaseId`
+4. **Config 3**: Both indexes combined
 
-Second index design:
-| Query | Cost |
-|----------|:---------:|
-| Query 1 |  |
-| Query 2 |  |
-| Query 3 |  |
-| Query 4 |  |
+### Results
 
-Third index design:
-| Query | Cost |
-|----------|:---------:|
-| Query 1 |  |
-| Query 2 |  |
-| Query 3 |  |
-| Query 4 |  |
+#### Baseline (No Additional Indexes)
+| Query | Cost | Description |
+|----------|:---------:|-------------|
+| Query 1 | 1,891 | Customers with multiple returns |
+| Query 2 | 5,460,000 | Loyal customers (high spend, no returns) |
+| Query 3 | 95,400,000 | Dormant big spenders |
+| Query 4 | 4,137 | Purchased in one category but not the other |
+
+#### Configuration 1: Index on Purchase.customerId
+| Query | Cost | Change from Baseline |
+|----------|:---------:|:---------:|
+| Query 1 | 1,891 | 0% |
+| Query 2 | 5,460,000 | 0% |
+| Query 3 | 95,400,000 | 0% |
+| Query 4 | 4,137 | 0% |
+
+**Analysis**: This index showed no performance improvement across all queries. The `customerId` column in the Purchase table already benefits from existing optimizations because it is a foreign key referencing the Customer table's primary key. In MySQL's InnoDB engine, foreign key constraints automatically create indexes to maintain referential integrity, making an explicit index redundant. Since all our queries already had optimal access to this column, adding a duplicate index provided no measurable benefit.
+
+#### Configuration 2: Index on Returns.purchaseId
+| Query | Cost | Change from Baseline |
+|----------|:---------:|:---------:|
+| Query 1 | 1,891 | 0% |
+| Query 2 | 5,460,000 | 0% |
+| Query 3 | 95,400,000 | 0% |
+| Query 4 | 10,293 | +148.8% |
+
+**Analysis**: This index configuration actually *degraded* performance for Query 4, increasing its cost by 148.8%. Similar to Config 1, the `purchaseId` column in the Returns table is already indexed due to two constraints: it's a foreign key to Purchase, and it has a UNIQUE constraint (since each purchase can only be returned once). The UNIQUE constraint automatically creates an index in MySQL. For Queries 1-3, the existing indexes were sufficient. Query 4's degradation likely occurred because it doesn't use the Returns table at all, but the presence of additional indexes can affect the query optimizer's decision-making process for the overall database.
+
+#### Configuration 3: Both Indexes Combined
+| Query | Cost | Change from Baseline |
+|----------|:---------:|:---------:|
+| Query 1 | 1,891 | 0% |
+| Query 2 | 5,460,000 | 0% |
+| Query 3 | 95,400,000 | 0% |
+| Query 4 | 10,293 | +148.8% |
+
+**Analysis**: Combining both indexes showed no cumulative benefit and maintained the same performance degradation for Query 4 seen in Config 2. This confirms that the additional indexes are redundant with existing constraints and provide no additive value. The consistent degradation of Query 4 across Config 2 and 3 suggests that adding unnecessary indexes introduces optimizer overhead without corresponding benefits.
+
+### Final Index Design Decision
+
+We chose **Baseline (no additional indexes)** as our final index design.
+
+**Rationale**: 
+
+- **No queries benefited**: All four queries showed either identical performance or degraded performance with additional indexes, indicating that our baseline schema already has optimal indexing
+- **Existing constraints provide sufficient indexing**: Our database schema leverages MySQL's automatic index creation through:
+  - Primary keys on all ID columns (`customerId`, `purchaseId`, `returnId`, `employeeId`, `listId`)
+  - Foreign key constraints that auto-create indexes for join operations
+  - UNIQUE constraint on `Returns.purchaseId` that creates an index
+- **Avoided performance degradation**: Config 2 and 3 showed a 148.8% cost increase for Query 4, demonstrating that unnecessary indexes can harm performance
+- **Index maintenance overhead**: Additional indexes consume storage space and slow down INSERT, UPDATE, and DELETE operations without providing any query performance benefits
+- **Dataset characteristics**: With our current data volume (~20,000 purchases, ~2,300 returns), the existing indexes are sufficient for efficient query execution. MySQL's optimizer effectively uses table scans and existing indexes without requiring additional indexing
+
+**Performance Summary**:
+- Query 1: No change (0%)
+- Query 2: No change (0%)
+- Query 3: No change (0%)
+- Query 4: Degraded with additional indexes (-148.8% in Config 2 & 3)
+- **Overall conclusion**: The baseline configuration is optimal
+
+### Key Takeaways
+
+This analysis demonstrates an important principle in database optimization: **more indexes do not always equal better performance**. Our schema was already well-designed with appropriate constraints that automatically create necessary indexes. The results validate our initial database design decisions:
+
+1. **Primary keys** provide clustered indexes for efficient lookups
+2. **Foreign keys** automatically create indexes for join operations in InnoDB
+3. **UNIQUE constraints** create indexes that enforce data integrity while optimizing queries
+4. **Small to medium datasets** often perform well with minimal indexing strategy
+
+If the database scales significantly (beyond 100,000+ rows per table), we should revisit this analysis, as larger datasets may benefit from specialized composite indexes on frequently queried column combinations like `(customerId, purchDate)` or `(category, purchDate)`.
