@@ -104,7 +104,7 @@ if they would not like to keep it.
 
 ### UI Mockup
 
-![UI mockup](IMG_3399.jpeg)
+![UI mockup](screenshots/IMG_3399.jpeg)
 
 The largest square is the home page and the arrows represent what page will load after clicking 
 an element on the home page. The individual pages are also reachable from each other via the 
