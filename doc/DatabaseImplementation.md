@@ -99,7 +99,7 @@ HAVING COUNT(r.returnId) >= 2
 ORDER BY total_returns DESC
 LIMIT 15;
 ```
-
+![query one](images/query1.png)
 ```
 SELECT c.custName, c.customerId, c.email, SUM(p.amount) as total_spent
 FROM Customer c JOIN Purchase p ON c.customerId = p.customerId
@@ -112,6 +112,7 @@ GROUP BY c.custName, c.customerId, c.email
 ORDER BY total_spent DESC
 LIMIT 15;
 ```
+![query two](images/query2.png)
 
 ## Indexing
 
