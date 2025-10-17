@@ -5,7 +5,7 @@ Link to Google Colab notebook with implementation: https://colab.research.google
 1. Since we are working on Google Colab, the database is run on an individual virtual machine that refeshes every time the notebook is closed or surpasses
    the runtime constraints. Because of this, each time we open the notebook we must run the following commands to redownload and start mySQL along with the database.
 
-insert screenshot
+![commands](images/Screenshot 2025-10-16 204129.png)
 
 2. Following are the Database Design Language (DDL) commands we used to implement our 5 entity tables and our 1 relationship table. The ENGINE and DEFAULT CHARSET
    specifications for each table guarantee that foreign key constrainsts and all characters are valid when mySQL creates the tables.
@@ -74,6 +74,12 @@ CREATE TABLE IF NOT EXISTS Returns (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;  
 
 3. The three tables that have more than 1000 entries are Customer, Purchase, and Returns. The count queries for those tables are in the screenshots below.
+
+![customer](images/Screenshot 2025-10-16 204850.png)  
+
+![purchase](images/Screenshot 2025-10-16 204902.png)  
+
+![returns](images/Screenshot 2025-10-16 204914.png)  
 
 ## Advanced Queries
 
