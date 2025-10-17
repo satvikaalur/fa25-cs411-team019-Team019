@@ -90,6 +90,7 @@ CREATE TABLE IF NOT EXISTS Returns (
 ## Advanced Queries
 We have decided to focus our advanced queries on our marketing email list creation, which will make lists of customers and 
 their emails based on different criteria. Below are the individual commands and the first 15 outputs.
+#### Query 1
 ```
 SELECT c.custName, c.customerId, c.email, COUNT(r.returnId) as total_returns
 FROM Customer c JOIN Purchase p ON c.customerId = p.customerId
@@ -100,6 +101,7 @@ ORDER BY total_returns DESC
 LIMIT 15;
 ```
 ![query one](images/query1.png)
+#### Query 2
 ```
 SELECT c.custName, c.customerId, c.email, SUM(p.amount) as total_spent
 FROM Customer c JOIN Purchase p ON c.customerId = p.customerId
@@ -113,6 +115,46 @@ ORDER BY total_spent DESC
 LIMIT 15;
 ```
 ![query two](images/query2.png)
+#### Query 3
+```
+code here
+```
+image here  
+#### Query 4
+```
+code here
+```
+image here  
 
 ## Indexing
+Firstly, we ran all of our queries with the EXPLAIN ANAYLZE command with no indexing. Below are the costs for each query in that scenario:
+| Query | Cost |
+|----------|:---------:|
+| Query 1 |  |
+| Query 2 |  |
+| Query 3 |  |
+| Query 4 |  |
 
+First index design:
+| Query | Cost |
+|----------|:---------:|
+| Query 1 |  |
+| Query 2 |  |
+| Query 3 |  |
+| Query 4 |  |
+
+Second index design:
+| Query | Cost |
+|----------|:---------:|
+| Query 1 |  |
+| Query 2 |  |
+| Query 3 |  |
+| Query 4 |  |
+
+Third index design:
+| Query | Cost |
+|----------|:---------:|
+| Query 1 |  |
+| Query 2 |  |
+| Query 3 |  |
+| Query 4 |  |
