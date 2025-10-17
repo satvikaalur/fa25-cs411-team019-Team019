@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS Employee (
   employeeId INT PRIMARY KEY,  
   empName VARCHAR(100) NOT NULL,  
   empTitle VARCHAR(100),  
-  tenure INT CHECK (tenure >= 0)  
+  tenure VARCHAR(225)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;  
 ```
 #### Purchase Table
@@ -88,7 +88,30 @@ CREATE TABLE IF NOT EXISTS Returns (
 ![returns](images/returns_count.png)  
 
 ## Advanced Queries
+We have decided to focus our advanced queries on our marketing email list creation, which will make lists of customers and 
+their emails based on different criteria. Below are the individual commands and the first 15 outputs.
+```
+SELECT c.custName, c.customerId, c.email, COUNT(r.returnId) as total_returns
+FROM Customer c JOIN Purchase p ON c.customerId = p.customerId
+JOIN Returns r ON p.purchaseId = r.purchaseId
+GROUP BY c.custName, c.customerId, c.email
+HAVING COUNT(r.returnId) >= 2
+ORDER BY total_returns DESC
+LIMIT 15;
+```
 
+```
+SELECT c.custName, c.customerId, c.email, SUM(p.amount) as total_spent
+FROM Customer c JOIN Purchase p ON c.customerId = p.customerId
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Returns r
+    WHERE p.purchaseId = r.purchaseId
+)
+GROUP BY c.custName, c.customerId, c.email
+ORDER BY total_spent DESC
+LIMIT 15;
+```
 
 ## Indexing
 
