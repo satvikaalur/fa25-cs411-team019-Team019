@@ -1,7 +1,7 @@
 # Database Design
 
 ## Entity-Relationship Diagram
-![ER Diagram](project_er_diagram.jpg)
+![ER Diagram](images/project_er_diagram.jpg)
 
 
 ## Design Specifics
