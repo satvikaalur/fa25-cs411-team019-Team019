@@ -5,12 +5,13 @@ Link to Google Colab notebook with implementation: https://colab.research.google
 1. Since we are working on Google Colab, the database is run on an individual virtual machine that refeshes every time the notebook is closed or surpasses
    the runtime constraints. Because of this, each time we open the notebook we must run the following commands to redownload and start mySQL along with the database.
 
-![commands](images/Screenshot 2025-10-16 204129.png)
+![commands](images/commands.png)
 
 2. Following are the Database Design Language (DDL) commands we used to implement our 5 entity tables and our 1 relationship table. The ENGINE and DEFAULT CHARSET
    specifications for each table guarantee that foreign key constrainsts and all characters are valid when mySQL creates the tables.
 
-#### Customer Table    
+#### Customer Table
+```
   CREATE TABLE IF NOT EXISTS Customer (  
   customerId INT PRIMARY KEY,  
   email VARCHAR(255) NOT NULL UNIQUE,  
@@ -18,15 +19,17 @@ Link to Google Colab notebook with implementation: https://colab.research.google
   age INT CHECK (age >= 0),  
   gender VARCHAR(20)  
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;   
-
+```
 #### Email List Table
+```
 CREATE TABLE IF NOT EXISTS EmailList (  
   listId INT PRIMARY KEY,  
   listTitle VARCHAR(120) NOT NULL UNIQUE,  
   createdDate DATE NOT NULL  
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;  
-
+```
 #### Customer-Email List Relationship Table
+```
 CREATE TABLE IF NOT EXISTS CustomerEmailList (  
   customerId INT NOT NULL,  
   listId INT NOT NULL,  
@@ -36,16 +39,18 @@ CREATE TABLE IF NOT EXISTS CustomerEmailList (
   FOREIGN KEY (listId) REFERENCES EmailList(listId)  
     ON UPDATE CASCADE ON DELETE CASCADE  
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;  
-
-#### Employee Table  
+```
+#### Employee Table 
+```
 CREATE TABLE IF NOT EXISTS Employee (  
   employeeId INT PRIMARY KEY,  
   empName VARCHAR(100) NOT NULL,  
   empTitle VARCHAR(100),  
   tenure INT CHECK (tenure >= 0)  
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;  
-
+```
 #### Purchase Table
+```
 CREATE TABLE IF NOT EXISTS Purchase (  
   purchaseId INT PRIMARY KEY,  
   customerId INT NOT NULL,  
@@ -57,8 +62,9 @@ CREATE TABLE IF NOT EXISTS Purchase (
   FOREIGN KEY (customerId) REFERENCES Customer(customerId)  
     ON UPDATE CASCADE  
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;  
-
+```
 #### Returns Table
+```
 CREATE TABLE IF NOT EXISTS Returns (  
   returnId INT PRIMARY KEY,  
   purchaseId INT NOT NULL UNIQUE,  
@@ -72,14 +78,14 @@ CREATE TABLE IF NOT EXISTS Returns (
     FOREIGN KEY (employeeId) REFERENCES Employee(employeeId)  
     ON UPDATE CASCADE  
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;  
-
+```
 3. The three tables that have more than 1000 entries are Customer, Purchase, and Returns. The count queries for those tables are in the screenshots below.
 
-![customer](images/Screenshot 2025-10-16 204850.png)  
+![customer](images/customer_count.png)  
 
-![purchase](images/Screenshot 2025-10-16 204902.png)  
+![purchase](images/purchase_count.png)  
 
-![returns](images/Screenshot 2025-10-16 204914.png)  
+![returns](images/returns_count.png)  
 
 ## Advanced Queries
 
