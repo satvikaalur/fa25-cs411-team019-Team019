@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { useState } from 'react'
 
-type Row = Record<string, any>
+type Row = Record<string, string>
 
 export default function Home() {
   const [rows, setRows] = useState<Row[]>([])
