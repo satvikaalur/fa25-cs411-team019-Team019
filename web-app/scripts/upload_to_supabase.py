@@ -111,6 +111,9 @@ customer_df['age'] = customer_df['age'].fillna(-1)
 
 # CustomerEmailList
 customer_emaillist_df = df[df['listid'].notna()][['customerid', 'listid']].drop_duplicates()
+customer_emaillist_df = customer_emaillist_df.dropna(subset=['customerid', 'listid'])
+customer_emaillist_df['customerid'] = customer_emaillist_df['customerid'].astype(int)
+customer_emaillist_df['listid'] = customer_emaillist_df['listid'].astype(int)
 
 # Purchase table
 purchase_df = df[['purchaseid', 'customerid', 'purchase_date', 'product_quantity',
@@ -118,10 +121,26 @@ purchase_df = df[['purchaseid', 'customerid', 'purchase_date', 'product_quantity
 purchase_df.columns = ['purchaseid', 'customerid', 'purchdate', 'quantity', 'category', 'amount', 'returned']
 purchase_df['purchdate'] = purchase_df['purchdate'].apply(lambda x: x.isoformat() if pd.notna(x) else None)
 
-# Returns table
+# --- Returns table ---
 returns_df = df[df['returnid'].notna()][['returnid', 'purchaseid', 'employeeid', 'call_date', 'csat_score']].copy()
 returns_df.columns = ['returnid', 'purchaseid', 'employeeid', 'returndate', 'csat_score']
+
+# Ensure datetime is ISO format string
 returns_df['returndate'] = returns_df['returndate'].apply(lambda x: x.isoformat() if pd.notna(x) else None)
+
+# Drop rows missing key IDs
+returns_df = returns_df.dropna(subset=['returnid', 'purchaseid'])
+
+# --- Clean up numeric IDs ---
+for col in ['returnid', 'purchaseid', 'employeeid']:
+    if col in returns_df.columns:
+        returns_df[col] = (
+            pd.to_numeric(returns_df[col], errors='coerce')
+            .fillna(-1)
+            .astype(int)
+            .replace(-1, None)
+        )
+
 
 # --- UPSERT INTO SUPABASE ---
 
@@ -129,7 +148,7 @@ supabase.table("customer").upsert(customer_df.to_dict(orient="records"), on_conf
 supabase.table("emaillist").upsert(emaillist_df.to_dict(orient="records"), on_conflict="listid").execute()
 supabase.table("employee").upsert(employee_df.to_dict(orient="records"), on_conflict="employeeid").execute()
 supabase.table("purchase").upsert(purchase_df.to_dict(orient="records"), on_conflict="purchaseid").execute()
-supabase.table("customeremaillist").upsert(customer_emaillist_df.to_dict(orient="records"), on_conflict=["customerid","listid"]).execute()
+supabase.table("customeremaillist").upsert(customer_emaillist_df.to_dict(orient="records")).execute()
 supabase.table("returns").upsert(returns_df.to_dict(orient="records"), on_conflict="returnid").execute()
 
 print("All data successfully uploaded to Supabase!")
