@@ -40,11 +40,11 @@ export default function Home() {
             <span className="text-lg font-semibold">InsightEdge</span>
           </div>
           <nav className="flex items-center gap-5 text-sm">
-            <a className="opacity-70 hover:opacity-100" href="/purchases">purchases</a>
-            <a className="opacity-70 hover:opacity-100" href="/products">products</a>
-            <a className="opacity-70 hover:opacity-100" href="/marketing">marketing</a>
+            <a className="opacity-70 hover:opacity-100" href="#">purchases</a>
+            <a className="opacity-70 hover:opacity-100" href="#">products</a>
+            <a className="opacity-70 hover:opacity-100" href="#">marketing</a>
             <span className="rounded-full bg-black px-3 py-1 text-white dark:bg-white dark:text-black">customers</span>
-            <a className="opacity-70 hover:opacity-100" href="/employees">employees</a>
+            <a className="opacity-70 hover:opacity-100" href="#">employees</a>
           </nav>
         </div>
       </header>
