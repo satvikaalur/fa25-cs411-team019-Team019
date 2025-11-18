@@ -15,3 +15,26 @@ export async function GET(req: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
   return NextResponse.json(data)
 }
+
+export async function PATCH(req: Request) {
+  try {
+    const body = await req.json()
+    const { empname, newRole } = body
+
+    if (!empname || !newRole) {
+      return NextResponse.json({ error: 'Missing employee name or newRole' }, { status: 400 })
+    }
+
+    const { data, error } = await supabase
+      .from('employee')
+      .update({ emptitle: newRole })
+      .eq('empname', empname)
+      .select()
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+    return NextResponse.json({ success: true, updated: data })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
+}
