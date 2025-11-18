@@ -8,10 +8,16 @@ const supabase = createClient(
 )
 
 type PurchaseRow = {
-  purchDate: string        // date
+  purchdate: string        // date
   quantity: number
   amount: number
   category: string | null
+  purchaseId: number
+}
+
+type ReturnRow = {
+  returnDate: string
+  purchaseId: number
 }
 
 export async function GET(req: NextRequest) {
@@ -72,7 +78,7 @@ export async function GET(req: NextRequest) {
   > = {}
 
   for (const row of rows) {
-    const dateKey = row.purchDate // assuming it's already 'YYYY-MM-DD'
+    const dateKey = row.purchdate // assuming it's already 'YYYY-MM-DD'
     if (!byDate[dateKey]) {
       byDate[dateKey] = { totalQuantity: 0, totalAmount: 0 }
     }

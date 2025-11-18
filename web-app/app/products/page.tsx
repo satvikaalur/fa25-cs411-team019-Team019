@@ -11,9 +11,10 @@ type CategorySummary = {
 }
 
 type TimeSeriesPoint = {
-  date: string
+  month: string
   totalQuantity: number
   totalAmount: number
+  numReturns: number
 }
 
 type SummaryResponse = {
@@ -88,6 +89,7 @@ export default function ProductsPage() {
   const maxAmount = Math.max(...summary.map((s) => s.totalAmount), 1)
   const maxQuantity = Math.max(...series.map((s) => s.totalQuantity), 1)
   const maxSeriesAmount = Math.max(...series.map((s) => s.totalAmount), 1)
+  const maxReturns = Math.max(...series.map((s) => s.numReturns), 1)
 
   return (
     <div className="min-h-screen bg-zinc-50 font-sans text-black dark:bg-black dark:text-zinc-50">
@@ -174,9 +176,44 @@ export default function ProductsPage() {
                 </select>
               </div>
 
-              {/* Line chart 1: Quantity over time */}
+              {/* Line chart 1: Returns per Month */}
               <div className="rounded-lg border border-black/10 bg-white p-6 dark:border-white/15 dark:bg-zinc-900">
-                <h3 className="mb-4 text-sm font-semibold">Quantity over Time ({selectedCategory})</h3>
+                <h3 className="mb-4 text-sm font-semibold">Returns per Month ({selectedCategory})</h3>
+                {series.length === 0 ? (
+                  <div className="flex h-32 items-center justify-center text-zinc-500 text-sm">
+                    No time series data available
+                  </div>
+                ) : series.length === 1 ? (
+                  <div className="flex h-32 items-center justify-center text-zinc-500 text-sm">
+                    Only one data point - need at least 2 points for a line chart
+                  </div>
+                ) : (
+                  <div className="relative h-32 border-l border-b border-zinc-200 dark:border-zinc-700">
+                    <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                      <polyline
+                        points={series
+                          .map((point, idx) => {
+                            const x = (idx / (series.length - 1)) * 100
+                            const y = 100 - (point.numReturns / maxReturns) * 90
+                            return `${x},${y}`
+                          })
+                          .join(' ')}
+                        fill="none"
+                        stroke="#ef4444"
+                        strokeWidth="2"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </svg>
+                    <div className="mt-2 text-xs text-zinc-500">
+                      Total returns: {series.reduce((sum, p) => sum + p.numReturns, 0)}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Line chart 2: Quantity over time */}
+              <div className="rounded-lg border border-black/10 bg-white p-6 dark:border-white/15 dark:bg-zinc-900">
+                <h3 className="mb-4 text-sm font-semibold">Quantity per Month ({selectedCategory})</h3>
                 {series.length === 0 ? (
                   <div className="flex h-32 items-center justify-center text-zinc-500 text-sm">
                     No time series data available
@@ -206,9 +243,9 @@ export default function ProductsPage() {
                 )}
               </div>
 
-              {/* Line chart 2: Amount over time */}
+              {/* Line chart 3: Amount over time */}
               <div className="rounded-lg border border-black/10 bg-white p-6 dark:border-white/15 dark:bg-zinc-900">
-                <h3 className="mb-4 text-sm font-semibold">Amount over Time ({selectedCategory})</h3>
+                <h3 className="mb-4 text-sm font-semibold">Revenue per Month ({selectedCategory})</h3>
                 {series.length === 0 ? (
                   <div className="flex h-32 items-center justify-center text-zinc-500 text-sm">
                     No time series data available
