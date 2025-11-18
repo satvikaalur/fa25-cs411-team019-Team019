@@ -23,7 +23,7 @@ export default function Home() {
             <Link href="/products" className="w-full md:w-auto">
               <div className="block w-full max-w-xs rounded-xl border border-gray-200 bg-white p-6 text-left shadow-md transition-transform transition-shadow duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
                 <h5 className="mb-1 text-xl font-semibold tracking-tight">
-                  mini product dashboard
+                  Product Dashboard
                 </h5>
               </div>
             </Link>
@@ -31,7 +31,7 @@ export default function Home() {
             <Link href="/purchases" className="w-full md:w-auto">
               <div className="block w-full max-w-xs rounded-xl border border-gray-200 bg-white p-6 text-left shadow-md transition-transform transition-shadow duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
                 <h5 className="mb-1 text-xl font-semibold tracking-tight">
-                  recent purchases
+                  Recent Purchases
                 </h5>
               </div>
             </Link>
