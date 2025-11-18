@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Navbar } from '../components/NavBar'
 
 interface EmailList {
