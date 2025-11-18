@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react'
+import { Navbar } from '../components/NavBar'
 
 interface EmailList {
   listId: number;
@@ -73,8 +74,8 @@ export default function EmailListsPage() {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Email List Builder</h1>
+    <div className="min-h-screen bg-zinc-50 font-sans text-black dark:bg-black dark:text-zinc-50">
+      <Navbar />
 
       {/* Custom List Filters */}
       <section className="mb-6">

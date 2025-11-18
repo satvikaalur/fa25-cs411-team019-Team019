@@ -1,7 +1,7 @@
 'use client'
 
-import Image from 'next/image'
 import { useState } from 'react'
+import { Navbar } from '../components/NavBar'
 
 type Row = Record<string, string>
 
@@ -33,21 +33,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-zinc-50 font-sans text-black dark:bg-black dark:text-zinc-50">
-      <header className="sticky top-0 z-10 border-b border-black/10 bg-white/80 backdrop-blur dark:border-white/10 dark:bg-black/60">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Image className="dark:invert" src="/next.svg" alt="Logo" width={72} height={16} />
-            <span className="text-lg font-semibold">InsightEdge</span>
-          </div>
-          <nav className="flex items-center gap-5 text-sm">
-            <a className="opacity-70 hover:opacity-100" href="#">purchases</a>
-            <a className="opacity-70 hover:opacity-100" href="#">products</a>
-            <a className="opacity-70 hover:opacity-100" href="#">marketing</a>
-            <span className="rounded-full bg-black px-3 py-1 text-white dark:bg-white dark:text-black">customers</span>
-            <a className="opacity-70 hover:opacity-100" href="#">employees</a>
-          </nav>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-10">
         <div className="flex items-center gap-3">
