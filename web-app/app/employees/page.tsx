@@ -79,11 +79,41 @@ export default function Home() {
                   <tr key={i} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/40">
                     {cols.map(c => (
                       <td key={c} className="border-b border-black/5 px-3 py-2 dark:border-white/10">
-                        {r[c] === null || r[c] === undefined
-                          ? ''
-                          : typeof r[c] === 'object'
-                          ? JSON.stringify(r[c])
-                          : String(r[c])}
+                        {c === 'emptitle' ? (
+                          <select
+                            value={r.emptitle}
+                            onChange={async e => {
+                              const newRole = e.target.value
+                              const res = await fetch('/api/employee', {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  empname: r.empname,
+                                  newRole: newRole        
+                                })
+                              })
+                            
+                              const json = await res.json()
+                              if (json.error) {
+                                alert('Error: ' + json.error)
+                              } else {
+                                setRows(prev =>
+                                  prev.map(row =>
+                                    row.empname === r.empname ? { ...row, emptitle: newRole } : row
+                                  )
+                                )
+                                // fetchEmployees() // refresh the table
+                              }
+                            }}
+                            className="rounded border px-2 py-1 text-sm"
+                          >
+                            <option value="Agent">Agent</option>
+                            <option value="Supervisor">Supervisor</option>
+                            <option value="Manager">Manager</option>
+                          </select>
+                        ) : (
+                          r[c] ?? ''
+                        )}
                       </td>
                     ))}
                   </tr>
