@@ -1,112 +1,124 @@
-'use client'
+'use client';
 
-import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react';
 
-type Row = Record<string, string>
+interface EmailList {
+  listId: number;
+  listTitle: string;
+  createdDate: string;
+}
 
-export default function Home() {
-  const [rows, setRows] = useState<Row[]>([])
-  const [q, setQ] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [err, setErr] = useState<string | null>(null)
+interface Customer {
+  custName: string;
+  email: string;
+}
 
-  async function fetchCustomers(query?: string) {
-    setLoading(true)
-    setErr(null)
-    const url = query && query.trim().length ? `/api/customer?q=${encodeURIComponent(query.trim())}` : '/api/customer'
-    const res = await fetch(url, { cache: 'no-store' })
-    const json = await res.json()
-    if (!res.ok || !Array.isArray(json)) {
-      setErr(typeof json?.error === 'string' ? json.error : 'Failed to load')
-      setRows([])
-    } else {
-      setRows(json)
+export default function EmailListsPage() {
+  const [lists, setLists] = useState<EmailList[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [expandedList, setExpandedList] = useState<number | null>(null);
+  const [customers, setCustomers] = useState<Record<number, Customer[]>>({});
+
+  const [listTitle, setListTitle] = useState('');
+  const [minDate, setMinDate] = useState('');
+  const [minSpend, setMinSpend] = useState('');
+  const [categories, setCategories] = useState('');
+  const [hasReturned, setHasReturned] = useState(false);
+
+  const fetchLists = async () => {
+    setLoading(true);
+    const res = await fetch('/api/email-lists');
+    const data = await res.json();
+    setLists(data);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchLists(); }, []);
+
+  const refreshAll = async () => {
+    setLoading(true);
+    await fetch('/api/email-lists', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'refreshAll' }),
+    });
+    await fetchLists();
+    setLoading(false);
+  };
+
+  const createList = async () => {
+    setLoading(true);
+    await fetch('/api/email-lists', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'createUserList', listTitle, minDate, minSpend, categories, hasReturned }),
+    });
+    await fetchLists();
+    setLoading(false);
+  };
+
+  const fetchCustomers = async (listId: number) => {
+    if (customers[listId]) {
+      setExpandedList(expandedList === listId ? null : listId);
+      return;
     }
-    setLoading(false)
-  }
-
-  const preferred = ['customer_id','email','custname','age','gender','created_at','updated_at']
-  const cols = rows.length
-    ? [...preferred.filter(k => k in rows[0]), ...Object.keys(rows[0]).filter(k => !preferred.includes(k))]
-    : []
+    const res = await fetch('/api/email-lists', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'getCustomersByList', listId }),
+    });
+    const data = await res.json();
+    setCustomers(prev => ({ ...prev, [listId]: data }));
+    setExpandedList(expandedList === listId ? null : listId);
+  };
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans text-black dark:bg-black dark:text-zinc-50">
-      <header className="sticky top-0 z-10 border-b border-black/10 bg-white/80 backdrop-blur dark:border-white/10 dark:bg-black/60">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Image className="dark:invert" src="/next.svg" alt="Logo" width={72} height={16} />
-            <span className="text-lg font-semibold">InsightEdge</span>
-          </div>
-          <nav className="flex items-center gap-5 text-sm">
-            <a className="opacity-70 hover:opacity-100" href="#">purchases</a>
-            <a className="opacity-70 hover:opacity-100" href="#">products</a>
-            <a className="opacity-70 hover:opacity-100" href="#">marketing</a>
-            <span className="rounded-full bg-black px-3 py-1 text-white dark:bg-white dark:text-black">customers</span>
-            <a className="opacity-70 hover:opacity-100" href="#">employees</a>
-          </nav>
-        </div>
-      </header>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Email List Builder</h1>
 
-      <main className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-10">
-        <div className="flex items-center gap-3">
-          <input
-            value={q}
-            onChange={e => setQ(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && fetchCustomers(q)}
-            placeholder="Search customers by name or email"
-            className="w-full rounded-md border border-black/10 bg-white px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-black dark:border-white/15 dark:bg-zinc-900 dark:focus:ring-white"
-          />
-          <button
-            onClick={() => fetchCustomers(q)}
-            className="rounded-md bg-black px-4 py-2 text-sm text-white transition-colors hover:bg-[#383838] dark:bg-white dark:text-black dark:hover:bg-[#ddd]"
-          >
-            {loading ? 'Searching…' : 'Search'}
-          </button>
-          <button
-            onClick={() => { setQ(''); fetchCustomers(); }}
-            className="rounded-md border border-black/10 px-4 py-2 text-sm hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
-          >
-            Load all
-          </button>
-        </div>
+      {/* Custom List Filters */}
+      <section className="mb-6">
+        <h2 className="font-semibold">Custom List Filters</h2>
+        <input placeholder="List Title" value={listTitle} onChange={e => setListTitle(e.target.value)} className="border p-1 m-1" />
+        <input type="date" placeholder="Min Purchase Date" value={minDate} onChange={e => setMinDate(e.target.value)} className="border p-1 m-1" />
+        <input type="number" placeholder="Min Spend" value={minSpend} onChange={e => setMinSpend(e.target.value)} className="border p-1 m-1" />
+        <input placeholder="Categories (comma)" value={categories} onChange={e => setCategories(e.target.value)} className="border p-1 m-1" />
+        <label className="m-1">
+          <input type="checkbox" checked={hasReturned} onChange={e => setHasReturned(e.target.checked)} /> Has Returned
+        </label>
+        <button onClick={createList} className="bg-blue-500 text-white px-3 py-1 rounded m-1">Create/Update List</button>
+      </section>
 
-        {err && <p className="text-sm text-red-500">{err}</p>}
+      {/* Existing Lists */}
+      <section className="mb-6">
+        <h2 className="font-semibold">Existing Lists</h2>
+        <button onClick={refreshAll} className="bg-green-500 text-white px-3 py-1 rounded mb-2">Refresh All Lists</button>
 
-        <div className="overflow-x-auto rounded-lg border border-black/10 dark:border-white/15">
-          {rows.length === 0 ? (
-            <div className="px-4 py-10 text-sm text-zinc-600 dark:text-zinc-400">No customers</div>
-          ) : (
-            <table className="w-full border-collapse text-sm">
-              <thead>
-                <tr className="bg-zinc-100 dark:bg-zinc-900">
-                  {cols.map(c => (
-                    <th key={c} className="border-b border-black/10 px-3 py-2 text-left font-semibold dark:border-white/15">
-                      {c}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r, i) => (
-                  <tr key={i} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/40">
-                    {cols.map(c => (
-                      <td key={c} className="border-b border-black/5 px-3 py-2 dark:border-white/10">
-                        {r[c] === null || r[c] === undefined
-                          ? ''
-                          : typeof r[c] === 'object'
-                          ? JSON.stringify(r[c])
-                          : String(r[c])}
-                      </td>
+        {loading ? <p>Loading...</p> : (
+          <ul>
+            {lists.map(list => (
+              <li key={list.listId} className="mb-2 border-b pb-2">
+                <div className="flex justify-between items-center">
+                  <span>{list.listTitle} ({new Date(list.createdDate).toLocaleDateString()})</span>
+                  <button
+                    onClick={() => fetchCustomers(list.listId)}
+                    className="text-blue-500 underline"
+                  >
+                    {expandedList === list.listId ? 'Hide Customers' : 'View Customers'}
+                  </button>
+                </div>
+                {expandedList === list.listId && customers[list.listId] && (
+                  <ul className="ml-4 mt-2">
+                    {customers[list.listId].map((cust, i) => (
+                      <li key={i}>{cust.custName} — {cust.email}</li>
                     ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </main>
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
-  )
+  );
 }
