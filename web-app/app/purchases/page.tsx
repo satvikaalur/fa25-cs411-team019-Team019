@@ -14,7 +14,7 @@ export default function Home() {
   async function fetchCustomers(query?: string) {
     setLoading(true)
     setErr(null)
-    const url = query && query.trim().length ? `/api/customer?q=${encodeURIComponent(query.trim())}` : '/api/customer'
+    const url = query && query.trim().length ? `/api/purchases?q=${encodeURIComponent(query.trim())}` : '/api/purchases'
     const res = await fetch(url, { cache: 'no-store' })
     const json = await res.json()
     if (!res.ok || !Array.isArray(json)) {
@@ -55,7 +55,7 @@ export default function Home() {
             value={q}
             onChange={e => setQ(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && fetchCustomers(q)}
-            placeholder="Search customers by name or email"
+            placeholder="Search purchases by name or email"
             className="w-full rounded-md border border-black/10 bg-white px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-black dark:border-white/15 dark:bg-zinc-900 dark:focus:ring-white"
           />
           <button

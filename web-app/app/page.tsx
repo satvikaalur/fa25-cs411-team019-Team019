@@ -49,62 +49,24 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-10">
-        <div className="flex items-center gap-3">
-          <input
-            value={q}
-            onChange={e => setQ(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && fetchCustomers(q)}
-            placeholder="Search customers by name or email"
-            className="w-full rounded-md border border-black/10 bg-white px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-black dark:border-white/15 dark:bg-zinc-900 dark:focus:ring-white"
-          />
-          <button
-            onClick={() => fetchCustomers(q)}
-            className="rounded-md bg-black px-4 py-2 text-sm text-white transition-colors hover:bg-[#383838] dark:bg-white dark:text-black dark:hover:bg-[#ddd]"
-          >
-            {loading ? 'Searching…' : 'Search'}
-          </button>
-          <button
-            onClick={() => { setQ(''); fetchCustomers(); }}
-            className="rounded-md border border-black/10 px-4 py-2 text-sm hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
-          >
-            Load all
-          </button>
+      <main className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-10 items-center">
+        <div className="flex items-center justify-center gap-3">
+          <h1 className="text-4xl md:text-5xl text-center tracking-wide"> Welcome to Insight Edge!
+          </h1>
         </div>
-
-        {err && <p className="text-sm text-red-500">{err}</p>}
-
-        <div className="overflow-x-auto rounded-lg border border-black/10 dark:border-white/15">
-          {rows.length === 0 ? (
-            <div className="px-4 py-10 text-sm text-zinc-600 dark:text-zinc-400">No customers</div>
-          ) : (
-            <table className="w-full border-collapse text-sm">
-              <thead>
-                <tr className="bg-zinc-100 dark:bg-zinc-900">
-                  {cols.map(c => (
-                    <th key={c} className="border-b border-black/10 px-3 py-2 text-left font-semibold dark:border-white/15">
-                      {c}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r, i) => (
-                  <tr key={i} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/40">
-                    {cols.map(c => (
-                      <td key={c} className="border-b border-black/5 px-3 py-2 dark:border-white/10">
-                        {r[c] === null || r[c] === undefined
-                          ? ''
-                          : typeof r[c] === 'object'
-                          ? JSON.stringify(r[c])
-                          : String(r[c])}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+        <div className="border-2 border-gray-300 dark:border-gray-700 rounded-xl p-8 shadow-lg bg-white dark:bg-zinc-900">
+          <div className="flex space-x-7">
+            <a href="/products" className="click">
+              <button className="block w-64 p-6 border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out text-left">
+                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Mini Product Dashboard</h5>
+              </button>
+            </a>
+            <a href="/purchases" className="click">
+              <button className="block w-64 p-6 border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out text-left">
+                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Recent Purchases</h5>
+              </button>
+            </a>
+          </div>
         </div>
       </main>
     </div>

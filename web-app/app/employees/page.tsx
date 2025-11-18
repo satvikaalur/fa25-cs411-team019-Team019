@@ -11,10 +11,10 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
-  async function fetchCustomers(query?: string) {
+  async function fetchEmployees(query?: string) {
     setLoading(true)
     setErr(null)
-    const url = query && query.trim().length ? `/api/customer?q=${encodeURIComponent(query.trim())}` : '/api/customer'
+    const url = query && query.trim().length ? `/api/employee?q=${encodeURIComponent(query.trim())}` : '/api/employee'
     const res = await fetch(url, { cache: 'no-store' })
     const json = await res.json()
     if (!res.ok || !Array.isArray(json)) {
@@ -26,7 +26,7 @@ export default function Home() {
     setLoading(false)
   }
 
-  const preferred = ['customer_id','email','custname','age','gender','created_at','updated_at']
+  const preferred = ['employeeid','empname','emptitle','tenure']
   const cols = rows.length
     ? [...preferred.filter(k => k in rows[0]), ...Object.keys(rows[0]).filter(k => !preferred.includes(k))]
     : []
@@ -43,8 +43,8 @@ export default function Home() {
             <a className="opacity-70 hover:opacity-100" href="#">purchases</a>
             <a className="opacity-70 hover:opacity-100" href="#">products</a>
             <a className="opacity-70 hover:opacity-100" href="#">marketing</a>
-            <span className="rounded-full bg-black px-3 py-1 text-white dark:bg-white dark:text-black">customers</span>
-            <a className="opacity-70 hover:opacity-100" href="#">employees</a>
+            <a className="opacity-70 hover:opacity-100" href="#">customers</a>
+            <span className="rounded-full bg-black px-3 py-1 text-white dark:bg-white dark:text-black">employees</span>
           </nav>
         </div>
       </header>
@@ -54,18 +54,18 @@ export default function Home() {
           <input
             value={q}
             onChange={e => setQ(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && fetchCustomers(q)}
-            placeholder="Search customers by name or email"
+            onKeyDown={e => e.key === 'Enter' && fetchEmployees(q)}
+            placeholder="Search employees by name"
             className="w-full rounded-md border border-black/10 bg-white px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-black dark:border-white/15 dark:bg-zinc-900 dark:focus:ring-white"
           />
           <button
-            onClick={() => fetchCustomers(q)}
+            onClick={() => fetchEmployees(q)}
             className="rounded-md bg-black px-4 py-2 text-sm text-white transition-colors hover:bg-[#383838] dark:bg-white dark:text-black dark:hover:bg-[#ddd]"
           >
             {loading ? 'Searching…' : 'Search'}
           </button>
           <button
-            onClick={() => { setQ(''); fetchCustomers(); }}
+            onClick={() => { setQ(''); fetchEmployees(); }}
             className="rounded-md border border-black/10 px-4 py-2 text-sm hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
           >
             Load all
@@ -76,7 +76,7 @@ export default function Home() {
 
         <div className="overflow-x-auto rounded-lg border border-black/10 dark:border-white/15">
           {rows.length === 0 ? (
-            <div className="px-4 py-10 text-sm text-zinc-600 dark:text-zinc-400">No customers</div>
+            <div className="px-4 py-10 text-sm text-zinc-600 dark:text-zinc-400">No employees</div>
           ) : (
             <table className="w-full border-collapse text-sm">
               <thead>
