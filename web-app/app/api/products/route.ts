@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
   // Only grab the columns we need for the dashboard
   let query = supabase
     .from('purchase')
-    .select('purchdate, quantity, amount, category')
+    .select('purchaseid, purchdate, quantity, amount, category')
 
   if (category) {
     query = query.eq('category', category)
@@ -71,24 +71,49 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ categories, summaryByCategory })
   }
 
-  // If a category is specified: group by date for that category
-  const byDate: Record<
+  // If a category is specified: group by MONTH for that category
+  const byMonth: Record<
     string,
     { totalQuantity: number; totalAmount: number }
   > = {}
 
   for (const row of rows) {
-    const dateKey = row.purchdate // assuming it's already 'YYYY-MM-DD'
-    if (!byDate[dateKey]) {
-      byDate[dateKey] = { totalQuantity: 0, totalAmount: 0 }
+    // Extract year-month from the date (YYYY-MM-DD -> YYYY-MM)
+    const monthKey = row.purchdate.substring(0, 7) // Takes 'YYYY-MM' part only
+    if (!byMonth[monthKey]) {
+      byMonth[monthKey] = { totalQuantity: 0, totalAmount: 0 }
     }
-    byDate[dateKey].totalQuantity += row.quantity ?? 0
-    byDate[dateKey].totalAmount += Number(row.amount ?? 0)
+    byMonth[monthKey].totalQuantity += row.quantity ?? 0
+    byMonth[monthKey].totalAmount += Number(row.amount ?? 0)
   }
 
-  const series = Object.entries(byDate)
-    .map(([date, agg]) => ({ date, ...agg }))
-    .sort((a, b) => a.date.localeCompare(b.date))
+  // Fetch returns data for this category
+  const { data: returnsData } = await supabase
+    .from('Returns')
+    .select('returnDate, purchaseId')
+  
+  const returnRows = (returnsData ?? []) as ReturnRow[]
+  
+  // Get purchase IDs for this category
+  const categoryPurchaseIds = new Set(rows.map(r => r.purchaseId))
+  
+  // Count returns by month for this category
+  const returnsByMonth: Record<string, number> = {}
+  for (const ret of returnRows) {
+    if (categoryPurchaseIds.has(ret.purchaseId)) {
+      const monthKey = ret.returnDate.substring(0, 7)
+      returnsByMonth[monthKey] = (returnsByMonth[monthKey] || 0) + 1
+    }
+  }
+
+  const series = Object.entries(byMonth)
+    .map(([month, agg]) => ({ 
+      month, 
+      totalQuantity: agg.totalQuantity,
+      totalAmount: agg.totalAmount,
+      numReturns: returnsByMonth[month] || 0
+    }))
+    .sort((a, b) => a.month.localeCompare(b.month))
 
   return NextResponse.json({ category, series })
 }
