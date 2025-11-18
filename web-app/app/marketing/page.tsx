@@ -1,125 +1,200 @@
-'use client';
+"use client";
 
-import { useState } from 'react'
-import { Navbar } from '../components/NavBar'
+import { useEffect, useState } from "react";
+import { Navbar } from "../components/NavBar";
 
-interface EmailList {
-  listId: number;
-  listTitle: string;
-  createdDate: string;
-}
+export default function MarketingListsPage() {
+  const [lists, setLists] = useState([]);
+  const [selectedList, setSelectedList] = useState<number | null>(null);
+  const [customers, setCustomers] = useState([]);
 
-interface Customer {
-  custName: string;
-  email: string;
-}
+  const [title, setTitle] = useState("");
+  const [lastPurchaseBefore, setLastPurchaseBefore] = useState("");
+  const [minSpent, setMinSpent] = useState("");
+  const [hasReturned, setHasReturned] = useState("any");
+  const [category, setCategory] = useState("");
 
-export default function EmailListsPage() {
-  const [lists, setLists] = useState<EmailList[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [expandedList, setExpandedList] = useState<number | null>(null);
-  const [customers, setCustomers] = useState<Record<number, Customer[]>>({});
+  const [popup, setPopup] = useState<string | null>(null);
 
-  const [listTitle, setListTitle] = useState('');
-  const [minDate, setMinDate] = useState('');
-  const [minSpend, setMinSpend] = useState('');
-  const [categories, setCategories] = useState('');
-  const [hasReturned, setHasReturned] = useState(false);
+  async function loadLists() {
+    const res = await fetch("/api/marketing", { cache: "no-store" });
+    const json = await res.json();
+    setLists(json);
+  }
 
-  const fetchLists = async () => {
-    setLoading(true);
-    const res = await fetch('/api/email-lists');
-    const data = await res.json();
-    setLists(data);
-    setLoading(false);
-  };
+  async function viewList(id: number) {
+    const res = await fetch(`/api/marketing?listid=${id}`);
+    const json = await res.json();
+    setCustomers(json);
+    setSelectedList(id);
+  }
 
-  useEffect(() => { fetchLists(); }, []);
+  async function deleteList(id: number) {
+    await fetch(`/api/marketing?listid=${id}`, { method: "DELETE" });
+    if (selectedList === id) setSelectedList(null);
+    loadLists();
+  }
 
-  const refreshAll = async () => {
-    setLoading(true);
-    await fetch('/api/email-lists', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'refreshAll' }),
+  async function createCustomList() {
+    const body = {
+      listtitle: title,
+      lastPurchaseBefore: lastPurchaseBefore || null,
+      minSpent: minSpent ? Number(minSpent) : null,
+      hasReturned: hasReturned === "any" ? null : hasReturned === "yes",
+      category: category || null,
+    };
+  
+    const res = await fetch("/api/marketing", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     });
-    await fetchLists();
-    setLoading(false);
-  };
-
-  const createList = async () => {
-    setLoading(true);
-    await fetch('/api/email-lists', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'createUserList', listTitle, minDate, minSpend, categories, hasReturned }),
-    });
-    await fetchLists();
-    setLoading(false);
-  };
-
-  const fetchCustomers = async (listId: number) => {
-    if (customers[listId]) {
-      setExpandedList(expandedList === listId ? null : listId);
+  
+    const result = await res.json();
+  
+    if (!result.success) {
+      setPopup("No customers matched your requirements. Please try again.");
       return;
     }
-    const res = await fetch('/api/email-lists', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'getCustomersByList', listId }),
-    });
-    const data = await res.json();
-    setCustomers(prev => ({ ...prev, [listId]: data }));
-    setExpandedList(expandedList === listId ? null : listId);
-  };
+  
+    setPopup(
+      `List '${title}' created successfully with ${result.count} customers!`
+    );
+  
+    // Reset fields
+    setTitle("");
+    setLastPurchaseBefore("");
+    setMinSpent("");
+    setHasReturned("any");
+    setCategory("");
+  
+    loadLists();
+  }
+
+  useEffect(() => {
+    loadLists();
+  }, []);
 
   return (
     <div className="min-h-screen bg-zinc-50 font-sans text-black dark:bg-black dark:text-zinc-50">
       <Navbar />
 
-      {/* Custom List Filters */}
-      <section className="mb-6">
-        <h2 className="font-semibold">Custom List Filters</h2>
-        <input placeholder="List Title" value={listTitle} onChange={e => setListTitle(e.target.value)} className="border p-1 m-1" />
-        <input type="date" placeholder="Min Purchase Date" value={minDate} onChange={e => setMinDate(e.target.value)} className="border p-1 m-1" />
-        <input type="number" placeholder="Min Spend" value={minSpend} onChange={e => setMinSpend(e.target.value)} className="border p-1 m-1" />
-        <input placeholder="Categories (comma)" value={categories} onChange={e => setCategories(e.target.value)} className="border p-1 m-1" />
-        <label className="m-1">
-          <input type="checkbox" checked={hasReturned} onChange={e => setHasReturned(e.target.checked)} /> Has Returned
-        </label>
-        <button onClick={createList} className="bg-blue-500 text-white px-3 py-1 rounded m-1">Create/Update List</button>
-      </section>
+      <main className="mx-auto flex max-w-7xl gap-6 px-6 py-10">
+        {/* Custom List Column */}
+        <div className="w-1/3 rounded-lg border border-black/10 p-4 dark:border-white/10 font-sans">
+          <h2 className="mb-4 text-lg font-semibold">Create Custom List</h2>
 
-      {/* Existing Lists */}
-      <section className="mb-6">
-        <h2 className="font-semibold">Existing Lists</h2>
-        <button onClick={refreshAll} className="bg-green-500 text-white px-3 py-1 rounded mb-2">Refresh All Lists</button>
+          {popup && (
+            <div className="mb-3 rounded bg-green-200 p-2 text-sm text-green-900" onClick={() => setPopup(null)}>
+              {popup}
+            </div>
+          )}
 
-        {loading ? <p>Loading...</p> : (
-          <ul>
-            {lists.map(list => (
-              <li key={list.listId} className="mb-2 border-b pb-2">
-                <div className="flex justify-between items-center">
-                  <span>{list.listTitle} ({new Date(list.createdDate).toLocaleDateString()})</span>
+          <input
+            placeholder="List Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="mb-2 w-full rounded border p-2 text-sm"
+          />
+
+          <label className="text-xs text-zinc-500">Last purchase before:</label>
+          <input
+            type="date"
+            value={lastPurchaseBefore}
+            onChange={(e) => setLastPurchaseBefore(e.target.value)}
+            className="mb-2 w-full rounded border p-2 text-sm"
+          />
+
+          <label className="text-xs text-zinc-500">Minimum spent:</label>
+          <input
+            placeholder="Min Spent ($)"
+            value={minSpent}
+            onChange={(e) => setMinSpent(e.target.value)}
+            className="mb-2 w-full rounded border p-2 text-sm"
+          />
+
+          <label className="text-xs text-zinc-500">Returns:</label>
+          <select
+            value={hasReturned}
+            onChange={(e) => setHasReturned(e.target.value)}
+            className="w-full p-2 border rounded bg-white text-black dark:bg-zinc-800 dark:text-white"
+          >
+            <option value="any">Returned or Not Returned</option>
+            <option value="yes">Has Returned</option>
+            <option value="no">Has Not Returned</option>
+          </select>
+
+          <label className="text-xs text-zinc-500">Product Category:</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full p-2 border rounded bg-white text-black dark:bg-zinc-800 dark:text-white"
+          >
+            <option value="">Any Category</option>
+            <option value="electronics">Electronics</option>
+            <option value="home">Home</option>
+            <option value="books">Books</option>
+          </select>
+
+          <button
+            onClick={createCustomList}
+            className="w-full rounded bg-black px-4 py-2 text-sm text-white hover:bg-[#333] dark:bg-white dark:text-black dark:hover:bg-[#ddd]"
+          >
+            Create List
+          </button>
+        </div>
+
+        {/* Existing Lists Column */}
+        <div className="w-1/3 rounded-lg border border-black/10 p-4 dark:border-white/10">
+          <h2 className="mb-4 text-lg font-semibold">Existing Lists</h2>
+
+          <div className="space-y-3">
+            {lists.map((l: any) => (
+              <div key={l.listid} className="rounded-md border border-black/10 p-3 dark:border-white/10">
+                <p className="font-medium">{l.listtitle}</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">{l.createddate}</p>
+                <p className="text-xs text-zinc-600 dark:text-zinc-300">{l.count} customers</p>
+                <div className="mt-2 flex gap-2">
                   <button
-                    onClick={() => fetchCustomers(list.listId)}
-                    className="text-blue-500 underline"
+                    onClick={() => viewList(l.listid)}
+                    className="rounded bg-black px-3 py-1 text-xs text-white hover:bg-[#383838] dark:bg-white dark:text-black dark:hover:bg-[#ddd]"
                   >
-                    {expandedList === list.listId ? 'Hide Customers' : 'View Customers'}
+                    View
+                  </button>
+
+                  <button
+                    onClick={() => deleteList(l.listid)}
+                    className="rounded border border-red-500 px-3 py-1 text-xs text-red-500 hover:bg-red-500/10"
+                  >
+                    Delete
                   </button>
                 </div>
-                {expandedList === list.listId && customers[list.listId] && (
-                  <ul className="ml-4 mt-2">
-                    {customers[list.listId].map((cust, i) => (
-                      <li key={i}>{cust.custName} — {cust.email}</li>
-                    ))}
-                  </ul>
-                )}
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
+        </div>
+
+        {/* Customers Column */}
+        {selectedList && (
+          <div className="w-1/3 rounded-lg border border-black/10 p-4 dark:border-white/10">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Customers</h2>
+              <button onClick={() => setSelectedList(null)} className="text-sm text-zinc-500 hover:underline">
+                Close
+              </button>
+            </div>
+
+            <div className="mt-4 max-h-[70vh] space-y-2 overflow-y-auto">
+              {customers.map((c: any, i: number) => (
+                <div key={i} className="rounded border border-black/10 p-2 text-sm dark:border-white/10">
+                  <p className="font-medium">{c.custname}</p>
+                  <p className="text-xs text-zinc-500">{c.email}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
-      </section>
+      </main>
     </div>
   );
 }
