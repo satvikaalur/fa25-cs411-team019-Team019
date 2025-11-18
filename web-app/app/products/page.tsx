@@ -177,7 +177,7 @@ export default function ProductsPage() {
               </div>
 
               {/* Line chart 1: Returns per Month */}
-              <div className="rounded-lg border border-black/10 bg-white p-6 dark:border-white/15 dark:bg-zinc-900">
+              {/* <div className="rounded-lg border border-black/10 bg-white p-6 dark:border-white/15 dark:bg-zinc-900">
                 <h3 className="mb-4 text-sm font-semibold">Returns per Month ({selectedCategory})</h3>
                 {series.length === 0 ? (
                   <div className="flex h-32 items-center justify-center text-zinc-500 text-sm">
@@ -209,7 +209,7 @@ export default function ProductsPage() {
                     </div>
                   </div>
                 )}
-              </div>
+              </div> */}
 
               {/* Line chart 2: Quantity over time */}
               <div className="rounded-lg border border-black/10 bg-white p-6 dark:border-white/15 dark:bg-zinc-900">

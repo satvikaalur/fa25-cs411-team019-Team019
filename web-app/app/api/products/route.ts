@@ -8,7 +8,7 @@ const supabase = createClient(
 )
 
 type PurchaseRow = {
-  purchdate: string        // date
+  purchdate: string        
   quantity: number
   amount: number
   category: string | null
