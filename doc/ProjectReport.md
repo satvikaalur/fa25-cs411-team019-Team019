@@ -1,5 +1,8 @@
 # Project Report
 
+Edit: When doing the demo of our application on 11/20, the TA requested that we take our SQL commands from the Supabase SQL Editor and put them in a Google Colab document so you would have access to them. As mentioned previously, we used PostgreSQL instead of MySQL as that is what is compatible with Supabase. Here is the link to the notebook: https://colab.research.google.com/drive/19r-qOkPpCsN_3HKahWrfM_u0I0WPc4sU?usp=sharing
+
+
 1. We had no major changes in our project plan since our project proposal. For our future outlook, we explored the possibility of Machine Learning in our application, but we were unable to integrate it in this phase of the project.
 2. InsightEdge does a good job of consolidating multiple factors of eCommerce management into one platform. Instead of having to individually access information from various platforms, we combine it into one for accessibility. Users of said company can now loop up and manage employees in an efficient manner. Our marketing list and dashboard provides helpful insights because of merged customer and purchase data. The interactive role update also improves usability. Our limitations are that currently the marketing email automation is not implemented. Email lists are generated, but we have to send them out manually instead of automatically. 
 3. The data source remained the same, as did the schema for the most part. The only change was the addition of a boolean attribute to the emaillist table to determine whether the list was built in or not.
